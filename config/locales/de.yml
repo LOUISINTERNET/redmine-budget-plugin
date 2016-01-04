@@ -8,6 +8,7 @@ de:
   label_materials: "Materialien: "
   field_profit: Gewinn
   field_budget: Gesamtbudget
+  field_disabled: Deaktiviert
   label_budget: "Gesamtbudget: "
   field_fixed_cost: Festpreis-Angebot
   field_project_manager_signoff: Projektleiter-Freigabe
@@ -17,7 +18,7 @@ de:
   field_due: Fälligkeitsdatum
   label_member_rate: Tarif (€)
   label_currency: €
-  message_updated_issues: "%d Tickets aktualisiert"
+  message_updated_issues: "%{number_updated} Tickets aktualisiert"
   message_budget_settings: Trage in jedes Feld einen Betrag in Euro oder Prozent ein, um den Standardbetrag zu setzen. Für Prozentwerte <strong>%%</strong> im Eingabefeld verwenden.
   label_non_billable_overhead: Nicht abrechenbare Kosten
   label_materials: Materialien
@@ -48,3 +49,6 @@ de:
   label_hours_estimated: "Geschätzte Stunden: "
   label_hours_used: "Gebrauchte Stunden: "
   label_toggle_all: "Alle Deliverable-Zeilen ausklappen"
+  label_disabled: (deaktiviert)
+  label_show_disabled: Deaktivierte zeigen
+  label_hide_disabled: Deaktivierte ausblenden

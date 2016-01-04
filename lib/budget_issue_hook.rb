@@ -1,5 +1,6 @@
 # Hooks to attach to the Redmine Issues.
 class BudgetIssueHook  < Redmine::Hook::ViewListener
+  include ActionView::Helpers::TranslationHelper
 
   # Renders the Deliverable subject
   #
@@ -22,12 +23,27 @@ class BudgetIssueHook  < Redmine::Hook::ViewListener
   # * :project => Current project
   #
   def view_issues_form_details_bottom(context = { })
-    if context[:project].module_enabled?('budget_module')
-      select = context[:form].select :deliverable_id, Deliverable.find_all_by_project_id(context[:project], :order => 'subject ASC').collect { |d| [d.subject, d.id] }, :include_blank => true 
-      return "<p>#{select}</p>"
-    else
-      return ''
+    unless context[:project].module_enabled?("budget_module")
+      return ""
     end
+
+    deliverables = Deliverable.where(project_id: context[:project]).order("subject ASC")
+    disabled_ids = deliverables.where(disabled: true).pluck(:id)
+
+    select_options = deliverables.map do |d|
+      [d.subject + (d.disabled ? " #{t "label_disabled"}" : ""), d.id]
+    end
+
+    select = context[:form].select :deliverable_id, select_options,
+                                   { include_blank: true },
+                                   { data: { disabled: disabled_ids.to_json } }
+
+    html = ""
+    html << javascript_include_tag("budget_issue_hook", plugin: "budget_plugin")
+    html << "<p>#{select}<br/>"
+    html << "<a id='show-disabled-deliverables'>#{t "label_show_disabled"}</a>"
+    html << "<a id='hide-disabled-deliverables' style='display:none'>#{t "label_hide_disabled"}</a>"
+    html << "</p>"
   end
   
   # Renders a select tag with all the Deliverables for the bulk edit page
