@@ -4,7 +4,7 @@ class RenameDueDateToDue < ActiveRecord::Migration
     
     Deliverable.reset_column_information
     
-    Deliverable.find(:all).each do |deliverable|
+    Deliverable.all.each do |deliverable|
       deliverable.update_attribute(:due, deliverable.due_date)
     end
     
@@ -16,7 +16,7 @@ class RenameDueDateToDue < ActiveRecord::Migration
     
     Deliverable.reset_column_information
     
-    Deliverable.find(:all).each do |deliverable|
+    Deliverable.all.each do |deliverable|
       deliverable.update_attribute(:due_date, deliverable.due)
     end
     

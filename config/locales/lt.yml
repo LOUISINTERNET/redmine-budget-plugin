@@ -13,4 +13,4 @@ lt:
   field_due: Data iki
   label_member_rate: Užmokestis (LTL)
   label_currency: $
-  message_updated_issues: Atnaujinta(i) %d darbų(ai)
+  message_updated_issues: Atnaujinta(i) %{number_updated} darbų(ai)

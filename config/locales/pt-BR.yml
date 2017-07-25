@@ -17,7 +17,7 @@ pt-BR:
   field_due: Data Prevista
   label_member_rate: Custo (R$)
   label_currency: R$
-  message_updated_issues: Atualizou %d tarefas
+  message_updated_issues: Atualizou %{number_updated} tarefas
   message_budget_settings: Informe um valor total ou porcentagem em cada campo para definir o Total padrão. Use <strong>%%</strong> para porcentagens.
   label_non_billable_overhead: Despesas não faturáveis
   label_materials: Materiais

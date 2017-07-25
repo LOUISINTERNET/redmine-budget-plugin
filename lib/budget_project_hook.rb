@@ -4,7 +4,7 @@ class BudgetProjectHook  < Redmine::Hook::ViewListener
     destination = context[:destination_project]
 
     if source.module_enabled?(:budget_module)
-      Deliverable.find(:all, :conditions => {:project_id => source.id}).each do |source_deliverable|
+      Deliverable.where(project_id: source.id).each do |source_deliverable|
         destination_deliverable = source_deliverable.class.new # STI classes
 
         # Copy attribute except for the ones that have wrapped
@@ -20,7 +20,7 @@ class BudgetProjectHook  < Redmine::Hook::ViewListener
 
         destination_deliverable.project = destination
         destination_deliverable.save # Need to save here because there is no relation on project to deliverable
-      end      
+      end
     end
   end
 end

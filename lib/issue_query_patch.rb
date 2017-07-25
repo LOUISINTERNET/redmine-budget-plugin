@@ -7,28 +7,27 @@ module IssueQueryPatch
 
     base.send(:include, InstanceMethods)
 
-    # Same as typing in the class 
+    # Same as typing in the class
     base.class_eval do
-      unloadable # Send unloadable so it will not be unloaded in development
       base.add_available_column(QueryColumn.new(:deliverable_subject, :sortable => "#{Deliverable.table_name}.subject"))
-      
+
       alias_method_chain :initialize_available_filters, :deliverable
     end
 
   end
-  
+
   module InstanceMethods
-    
+
     # Wrapper around the +initialize_available_filters+ to add a new Deliverable filter
     def initialize_available_filters_with_deliverable
       initialize_available_filters_without_deliverable
-      
+
       if project
-        deliverable_values = Deliverable.find(:all, :conditions => ["project_id IN (?)", project], :order => 'subject ASC').collect { |d| [d.subject, d.id.to_s]}
+        deliverable_values = Deliverable.where(project_id: project).order("subject ASC").collect { |d| [d.subject, d.id.to_s]}
         add_available_filter "deliverable_id", :type => :list_optional, :values => deliverable_values
       end
     end
-  end    
+  end
 end
 
 

@@ -15,7 +15,7 @@ field_deliverable: Deliverable
 field_deliverable_subject: Deliverable
 field_due: Fälligkeitsdatum
 label_member_rate: Tarif (€)
-message_updated_issues: "%d Tickets aktualisiert"
+message_updated_issues: "%{number_updated} Tickets aktualisiert"
 message_budget_settings: Trage in jedes Feld einen Betrag in Euro oder Prozent ein, um den Standardbetrag zu setzen. Für Prozentwerte <strong>%%</strong> im Eingabefeld verwenden.
 label_non_billable_overhead: Nicht abrechenbare Kosten
 label_materials: Materialien

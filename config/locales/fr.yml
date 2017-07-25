@@ -17,7 +17,7 @@ fr:
   field_due: "Date d'echeance"
   label_member_rate: Tarif (€)
   label_currency: €
-  message_updated_issues: "%d demandes mises à jour"
+  message_updated_issues: "%{number_updated} demandes mises à jour"
   message_budget_settings: Entrez un montant en euros ou un pourcentage dans chaque champs pour régler le montant par defaut. Utilisez <strong>%%</strong> dans le champ pour des pourcentages.
   label_non_billable_overhead: Frais géneraux non facturables
   label_materials: Matières premières

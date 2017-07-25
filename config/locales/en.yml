@@ -18,7 +18,7 @@ en:
   field_due: Due Date
   label_member_rate: Rate ($)
   label_currency: $
-  message_updated_issues: Updated %d issues
+  message_updated_issues: Updated %{number_updated} issues
   message_budget_settings: Enter an amount in dollars, or a percentage into each field to set your default amount.  Use <strong>%%</strong> in the field for percentages.
   label_non_billable_overhead: Non billable overhead
   label_materials: Materials

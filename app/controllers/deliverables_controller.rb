@@ -1,5 +1,4 @@
 class DeliverablesController < ApplicationController
-  unloadable
   layout 'base'
   before_filter :find_project, :authorize, :get_settings
 
@@ -11,15 +10,12 @@ class DeliverablesController < ApplicationController
     sort_init "#{Deliverable.table_name}.id", "desc"
     sort_update 'id' => "#{Deliverable.table_name}.id"
 
-    @deliverable_count = Deliverable.count(:conditions => { :project_id => @project.id})
+    deliverables = Deliverable.where(project_id: @project.id)
+    @deliverable_count = deliverables.count
     @deliverable_pages = Paginator.new self, @deliverable_count, per_page_option, params['page']
-    @deliverables = Deliverable.find(:all,
-                                     {
-                                       :conditions => { :project_id => @project.id},
-                                       :limit => per_page_option,
-                                       :offset => @deliverable_pages.current.offset
-                                     }.merge(sort_order)
-                                     )
+    @deliverables = deliverables.limit(per_page_option)
+                                .offset(@deliverable_pages.current.offset)
+                                .merge(sort_order)
 
     @deliverables = sort_if_needed @deliverables
 
@@ -42,6 +38,7 @@ class DeliverablesController < ApplicationController
 
   # Saves a new Deliverable
   def create
+    params = user_params
     if params[:deliverable][:type] == FixedDeliverable.name
       @deliverable = FixedDeliverable.new(params[:deliverable])
     elsif params[:deliverable][:type] == HourlyDeliverable.name
@@ -66,11 +63,13 @@ class DeliverablesController < ApplicationController
 
   # Builds the edit form for the Deliverable
   def edit
-    @deliverable = Deliverable.find_by_id_and_project_id(params[:deliverable_id], @project.id)
+    @deliverable = Deliverable.where(id: params[:deliverable_id], project_id: @project.id).first
   end
 
   # Updates an existing Deliverable, optionally changing it's type
   def update
+    params = user_params
+
     @deliverable = Deliverable.find(params[:deliverable_id])
 
     if params[:deliverable][:type] != @deliverable.class
@@ -91,7 +90,7 @@ class DeliverablesController < ApplicationController
 
   # Removes the Deliverable
   def destroy
-    @deliverable = Deliverable.find_by_id_and_project_id(params[:deliverable_id], @project.id)
+    @deliverable = Deliverable.find(params[:deliverable_id])
 
     render_404 and return unless @deliverable
     render_403 and return unless @deliverable.editable_by?(User.current)
@@ -118,18 +117,27 @@ class DeliverablesController < ApplicationController
 
   # Assigns issues to the Deliverable based on their Version
   def bulk_assign_issues
-    @deliverable = Deliverable.find_by_id_and_project_id(params[:deliverable_id], @project.id)
+    @deliverable = Deliverable.find(params[:deliverable_id])
 
     render_404 and return unless @deliverable
     render_403 and return unless @deliverable.editable_by?(User.current)
 
     number_updated = @deliverable.assign_issues_by_version(params[:version][:id])
 
-    flash[:notice] = l(:message_updated_issues, number_updated)
+    flash[:notice] = l(:message_updated_issues, :number_updated => number_updated)
     redirect_to :action => 'index', :id => @project.identifier
   end
 
   private
+
+  def user_params
+    params.permit(:deliverable_id,
+                  :deliverable => [ :subject, :description, :due,
+                                    :project_manager_signoff, :client_signoff,
+                                    :type, :cost_per_hour, :total_hours,
+                                    :overhead, :materials, :profit ])
+  end
+
   def find_project
     @project = Project.where(:identifier => params[:id]).first || Project.find(params[:id])
   end

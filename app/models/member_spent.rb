@@ -4,7 +4,7 @@ class MemberSpent
   attr_accessor :user
   attr_accessor :hours
   attr_accessor :spent
-  
+
   # New data structure to hold the Member's data
   def initialize(options = { })
     self.user = options[:user] || nil
@@ -16,19 +16,19 @@ class MemberSpent
   def self.find_all_by_deliverable(deliverable)
     membership = []
     return membership unless deliverable.issues.size > 0
-    
-    
+
+
     project = deliverable.project
     time_entries = deliverable.issues.collect(&:time_entries).flatten
-    
-    
+
+
     project.members.each do |member|
       member_time_entries = time_entries.select { |tl| tl.user_id == member.user.id}
-      
+
       spent = member_time_entries.collect(&:cost).sum
       hours = member_time_entries.collect(&:hours).sum
 
-      membership << MemberSpent.new({ 
+      membership << MemberSpent.new({
                                       :user => member.user,
                                       :hours => hours,
                                       :spent => spent

@@ -8,14 +8,14 @@ class BudgetIssueHook  < Redmine::Hook::ViewListener
   # * :issue => Issue being rendered
   #
   def view_issues_show_details_bottom(context = { })
-    if context[:project].module_enabled?('budget_module')
+    if context[:project] and context[:project].module_enabled?('budget_module')
       data = "<td><b>Deliverable :</b></td><td>#{html_escape context[:issue].deliverable.subject unless context[:issue].deliverable.nil?}</td>"
       return "<tr>#{data}<td></td></tr>"
     else
       return ''
     end
   end
-  
+
   # Renders a select tag with all the Deliverables
   #
   # Context:
@@ -23,7 +23,7 @@ class BudgetIssueHook  < Redmine::Hook::ViewListener
   # * :project => Current project
   #
   def view_issues_form_details_bottom(context = { })
-    unless context[:project].module_enabled?("budget_module")
+    unless context[:project] and context[:project].module_enabled?("budget_module")
       return ""
     end
 
@@ -45,20 +45,25 @@ class BudgetIssueHook  < Redmine::Hook::ViewListener
     html << "<a id='hide-hidden-deliverables' style='display:none'>#{t "label_hide_hidden"}</a>"
     html << "</p>"
   end
-  
+
   # Renders a select tag with all the Deliverables for the bulk edit page
   #
   # Context:
   # * :project => Current project
   #
   def view_issues_bulk_edit_details_bottom(context = { })
-    if context[:project].module_enabled?('budget_module')
-      select = select_tag('deliverable_id',
-                               content_tag('option', l(:label_no_change_option), :value => '') +
-                               content_tag('option', l(:label_none), :value => 'none') +
-                               options_from_collection_for_select(Deliverable.find_all_by_project_id(context[:project].id, :order => 'subject ASC'), :id, :subject))
+    project = context[:project] || \
+              context[:hook_caller].instance_eval { @target_project }
 
-      return content_tag(:p, content_tag(:label, l(:field_deliverable)) + select)
+    if project and project.module_enabled?('budget_module')
+      deliverables = Deliverable.where(project_id: project.id).order('subject ASC')
+
+      select = select_tag('deliverable_id',
+                               content_tag('option', t(:label_no_change_option), :value => '') +
+                               content_tag('option', t(:label_none), :value => 'none') +
+                               options_from_collection_for_select(deliverables, :id, :subject))
+
+      return content_tag(:p, content_tag(:label, t(:field_deliverable)) + select)
     else
       return ''
     end
@@ -67,7 +72,7 @@ class BudgetIssueHook  < Redmine::Hook::ViewListener
   def set_deliverable_on_issue(context)
     if context[:params] && context[:params][:issue]
       if context[:params][:issue][:deliverable_id].present?
-        context[:issue].deliverable = Deliverable.find_by_id_and_project_id(context[:params][:issue][:deliverable_id].to_i, context[:issue].project.id)
+        context[:issue].deliverable = Deliverable.find_by(id: context[:params][:issue][:deliverable_id].to_i, project_id: context[:issue].project.id)
       elsif context[:params][:issue][:deliverable_id] == ''
         context[:issue].deliverable = nil
       end
@@ -82,7 +87,7 @@ class BudgetIssueHook  < Redmine::Hook::ViewListener
   def controller_issues_edit_before_save(context = {})
     set_deliverable_on_issue(context)
   end
-  
+
   # Saves the Deliverable assignment to the issue
   #
   # Context:
@@ -103,7 +108,7 @@ class BudgetIssueHook  < Redmine::Hook::ViewListener
 
     return ''
   end
-  
+
   # Deliverable changes for the journal use the Deliverable subject
   # instead of the id
   #
@@ -112,13 +117,24 @@ class BudgetIssueHook  < Redmine::Hook::ViewListener
   #
   def helper_issues_show_detail_after_setting(context = { })
     # TODO Later: Overwritting the caller is bad juju
-    if context[:detail].prop_key == 'deliverable_id'
-      d = Deliverable.find_by_id(context[:detail].value)
-      context[:detail].value = d.subject unless d.nil? || d.subject.nil?
+    detail = context[:detail]
 
-      d = Deliverable.find_by_id(context[:detail].old_value)
-      context[:detail].old_value = d.subject unless d.nil? || d.subject.nil?      
+    unless detail.prop_key == 'deliverable_id'
+      return
     end
-    ''
+
+    # The regex ensures that we don't try to call find with something that
+    # isn't an id. This is necessary because detail.value or detail.old_value
+    # will already be the deliverable subject sometimes.
+
+    unless detail.value.nil? or detail.value =~ /[^0-9]+/
+      d = Deliverable.find(detail.value)
+      detail.value = d.subject unless d.nil? || d.subject.nil?
+    end
+
+    unless detail.old_value.nil? or detail.old_value =~ /[^0-9]+/
+      d = Deliverable.find(detail.old_value)
+      detail.old_value = d.subject unless d.nil? || d.subject.nil?
+    end
   end
 end

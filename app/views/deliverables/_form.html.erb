@@ -95,7 +95,7 @@
 
     </div>
     <%= mode == :create ? submit_tag(l(:button_create)) : submit_tag(l(:button_update)) %>
-    <%= preview_link(preview_deliverable_path(:id => @project), 'deliverable-form') %>
+    <%= preview_link(preview_deliverable_path(:id => @project.id), 'deliverable-form') %>
 
 <div id="preview" class="wiki"></div>
 </fieldset>

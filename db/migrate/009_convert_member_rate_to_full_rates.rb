@@ -14,7 +14,7 @@ class ConvertMemberRateToFullRates < ActiveRecord::Migration
     self.check_that_rate_plugin_is_installed
     
     # Add a new Rate object for each Member
-    Member.find(:all, :conditions => ['rate IS NOT NULL']).each do |member|
+    Member.where.not(rate: nil).each do |member|
       say_with_time "Converting rate for #{member.user.to_s} - #{member.project.to_s}" do
         # Need to find the first date for any TimeEntries  #1924
         first_time_entry = TimeEntry.find(:first,
